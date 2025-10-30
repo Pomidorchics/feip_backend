@@ -1,6 +1,8 @@
-﻿services:
+services:
   database:
-    image: postgres:16-alpine
+    build:
+      context: .
+      dockerfile: docker/postgresql/Dockerfile
     environment:
       POSTGRES_DB: app
       POSTGRES_PASSWORD: ChangeMe
@@ -11,12 +13,13 @@
       - database_data:/var/lib/postgresql/data:rw
 
   nginx:
-    image: nginx:alpine
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
     ports:
       - '80:80'
     volumes:
       - .:/var/www
-      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - php
 
