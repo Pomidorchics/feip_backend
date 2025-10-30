@@ -1,37 +1,58 @@
-services:
+﻿services:
+###> doctrine/doctrine-bundle ###
   database:
     build:
       context: .
       dockerfile: docker/postgresql/Dockerfile
     environment:
-      POSTGRES_DB: app
-      POSTGRES_PASSWORD: ChangeMe
-      POSTGRES_USER: app
-    ports:
-      - '5432:5432'
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ChangeMe}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB:-app}", "-U", "${POSTGRES_USER:-app}"]
+      timeout: 5s
+      retries: 5
+      start_period: 60s
     volumes:
       - database_data:/var/lib/postgresql/data:rw
+    ports:
+      - "5432:5432"
+###< doctrine/doctrine-bundle ###
 
+###> nginx service ###
   nginx:
     build:
       context: .
       dockerfile: docker/nginx/Dockerfile
     ports:
-      - '80:80'
+      - "80:80"
     volumes:
       - .:/var/www
     depends_on:
-      - php
+      php:
+        condition: service_healthy
+###< nginx service ###
 
+###> php service ###
   php:
     build:
       context: .
       dockerfile: docker/php/Dockerfile
     volumes:
-      - .:/var/www
+      - ${PWD}:/var/www
+      - ${PWD}/data:/var/www/data
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+###< php service ###
 
 volumes:
+###> doctrine/doctrine-bundle ###
   database_data:
+###< doctrine/doctrine-bundle ###
 
 networks:
   default:
