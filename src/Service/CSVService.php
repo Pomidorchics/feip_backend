@@ -2,13 +2,15 @@
 
 namespace App\Service;
 
+use Carbon\Carbon;
+
 class CSVService
 {
     private string $projectDir;
 
-    public function __construct()
+    public function __construct(string $projectDir)
     {
-        $this->projectDir = dirname(__DIR__, 2);
+        $this->projectDir = $projectDir;
     }
 
     /**
@@ -52,7 +54,10 @@ class CSVService
         $newId = 1;
         if (!empty($bookings)) {
             $ids = array_column($bookings, 'id');
-            $newId = max($ids) + 1;
+            $ids = array_map('intval', $ids);
+            
+            $maxId = !empty($ids) ? max($ids) : 0;
+            $newId = $maxId + 1;
         }
         
         $fullBookingData = [
@@ -61,7 +66,7 @@ class CSVService
             'house_name' => $bookingData['house_name'],
             'phone' => $bookingData['phone'],
             'comment' => $bookingData['comment'],
-            'created_at' => date('Y-m-d H:i:s'),
+            'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
             'status' => 'active'
         ];
 
@@ -82,9 +87,10 @@ class CSVService
 
         $updated = false;
         foreach ($bookings as &$booking) {
-            if (isset($booking['id']) && $booking['id'] == $bookingId) {
+            // ИСПРАВЛЕНИЕ: приводим к int для сравнения
+            if (isset($booking['id']) && (int)$booking['id'] === $bookingId) {
                 $booking['comment'] = $newComment;
-                $booking['updated_at'] = date('Y-m-d H:i:s');
+                $booking['updated_at'] = Carbon::now()->format('Y-m-d H:i:s');
                 $updated = true;
                 break;
             }
@@ -218,14 +224,22 @@ class CSVService
         }
 
         if (($handle = fopen($filePath, 'w')) !== FALSE) {
-            fputcsv($handle, array_keys($data[0]));
+            $headers = array_keys($data[0]);
+            fputcsv($handle, $headers);
             
             foreach ($data as $row) {
-                fputcsv($handle, $row);
+                $orderedRow = [];
+                foreach ($headers as $header) {
+                    $orderedRow[$header] = $row[$header] ?? '';
+                }
+                fputcsv($handle, $orderedRow);
             }
             
             fclose($handle);
-            return true;
+            
+            if (filesize($filePath) > 0) {
+                return true;
+            }
         }
 
         return false;

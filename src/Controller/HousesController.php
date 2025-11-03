@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class HousesController extends AbstractController
 {
@@ -25,24 +26,16 @@ class HousesController extends AbstractController
     #[Route('/api/houses/available', name: 'available_houses', methods: ['GET'])]
     public function getAvailableHouses(): JsonResponse
     {
-        try {
-            $houses = $this->csvService->readHouses();
-            $availableHouses = array_filter($houses, function($house) {
-                return isset($house['is_available']) && $house['is_available'] == '1';
-            });
+        $houses = $this->csvService->readHouses();
+        $availableHouses = array_filter($houses, function($house) {
+            return isset($house['is_available']) && $house['is_available'] == '1';
+        });
 
-            return $this->json([
-                'success' => true,
-                'data' => array_values($availableHouses),
-                'count' => count($availableHouses)
-            ]);
-
-        } catch (\Exception $e) {
-            return $this->json([
-                'success' => false,
-                'error' => 'Ошибка при получении списка домиков: ' . $e->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        return $this->json([
+            'success' => true,
+            'data' => array_values($availableHouses),
+            'count' => count($availableHouses)
+        ]);
     }
 
     /**
@@ -52,86 +45,60 @@ class HousesController extends AbstractController
     #[Route('/api/bookings', name: 'create_booking', methods: ['POST'])]
     public function createBooking(Request $request): JsonResponse
     {
-        try {
-            $data = json_decode($request->getContent(), true);
+        $data = json_decode($request->getContent(), true);
 
-            if (!isset($data['phone']) || empty($data['phone'])) {
-                return $this->json([
-                    'success' => false,
-                    'error' => 'Поле "phone" обязательно для заполнения'
-                ], Response::HTTP_BAD_REQUEST);
-            }
+        if (!isset($data['phone']) || empty($data['phone'])) {
+            throw new HttpException(Response::HTTP_BAD_REQUEST, 'Поле "phone" обязательно для заполнения');
+        }
 
-            if (!isset($data['house_id']) || empty($data['house_id'])) {
-                return $this->json([
-                    'success' => false,
-                    'error' => 'Поле "house_id" обязательно для заполнения'
-                ], Response::HTTP_BAD_REQUEST);
-            }
+        if (!isset($data['house_id']) || empty($data['house_id'])) {
+            throw new HttpException(Response::HTTP_BAD_REQUEST, 'Поле "house_id" обязательно для заполнения');
+        }
 
-            $phone = $data['phone'];
-            $houseId = (int)$data['house_id'];
-            $comment = $data['comment'] ?? '';
+        $phone = $data['phone'];
+        $houseId = (int)$data['house_id'];
+        $comment = $data['comment'] ?? '';
 
-            if (!preg_match('/^\+?[0-9\s\-\(\)]{10,}$/', $phone)) {
-                return $this->json([
-                    'success' => false,
-                    'error' => 'Неверный формат номера телефона'
-                ], Response::HTTP_BAD_REQUEST);
-            }
+        if (!preg_match('/^\+?[0-9\s\-\(\)]{10,}$/', $phone)) {
+            throw new HttpException(Response::HTTP_BAD_REQUEST, 'Неверный формат номера телефона');
+        }
 
-            $houses = $this->csvService->readHouses();
-            $houseExists = false;
-            $houseDetails = null;
+        $houses = $this->csvService->readHouses();
+        $houseExists = false;
+        $houseDetails = null;
 
-            foreach ($houses as $house) {
-                if (isset($house['id']) && $house['id'] == $houseId) {
-                    if ($house['is_available'] != '1') {
-                        return $this->json([
-                            'success' => false,
-                            'error' => 'Домик недоступен для бронирования'
-                        ], Response::HTTP_BAD_REQUEST);
-                    }
-                    $houseExists = true;
-                    $houseDetails = $house;
-                    break;
+        foreach ($houses as $house) {
+            if (isset($house['id']) && $house['id'] == $houseId) {
+                if ($house['is_available'] != '1') {
+                    throw new HttpException(Response::HTTP_BAD_REQUEST, 'Домик недоступен для бронирования');
                 }
+                $houseExists = true;
+                $houseDetails = $house;
+                break;
             }
+        }
 
-            if (!$houseExists) {
-                return $this->json([
-                    'success' => false,
-                    'error' => 'Домик с указанным ID не найден'
-                ], Response::HTTP_NOT_FOUND);
-            }
+        if (!$houseExists) {
+            throw new HttpException(Response::HTTP_NOT_FOUND, 'Домик с указанным ID не найден');
+        }
 
-            $bookingData = [
-                'house_id' => $houseId,
-                'phone' => $phone,
-                'comment' => $comment,
-                'house_name' => $houseDetails['name'] ?? 'Неизвестный домик'
-            ];
+        $bookingData = [
+            'house_id' => $houseId,
+            'phone' => $phone,
+            'comment' => $comment,
+            'house_name' => $houseDetails['name'] ?? 'Неизвестный домик'
+        ];
 
-            $result = $this->csvService->addBooking($bookingData);
+        $result = $this->csvService->addBooking($bookingData);
 
-            if ($result) {
-                return $this->json([
-                    'success' => true,
-                    'message' => 'Бронирование создано успешно',
-                    'booking_id' => $result
-                ], Response::HTTP_CREATED);
-            } else {
-                return $this->json([
-                    'success' => false,
-                    'error' => 'Ошибка при создании бронирования'
-                ], Response::HTTP_INTERNAL_SERVER_ERROR);
-            }
-
-        } catch (\Exception $e) {
+        if ($result) {
             return $this->json([
-                'success' => false,
-                'error' => 'Ошибка при создании бронирования: ' . $e->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+                'success' => true,
+                'message' => 'Бронирование создано успешно',
+                'booking_id' => $result
+            ], Response::HTTP_CREATED);
+        } else {
+            throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR, 'Ошибка при создании бронирования');
         }
     }
 
@@ -142,54 +109,37 @@ class HousesController extends AbstractController
     #[Route('/api/bookings/{id}', name: 'update_booking', methods: ['PUT'])]
     public function updateBooking(int $id, Request $request): JsonResponse
     {
-        try {
-            $data = json_decode($request->getContent(), true);
+        $data = json_decode($request->getContent(), true);
 
-            if (!isset($data['comment']) || empty(trim($data['comment']))) {
-                return $this->json([
-                    'success' => false,
-                    'error' => 'Поле "comment" обязательно для заполнения и не может быть пустым'
-                ], Response::HTTP_BAD_REQUEST);
+        if (!isset($data['comment']) || empty(trim($data['comment']))) {
+            throw new HttpException(Response::HTTP_BAD_REQUEST, 'Поле "comment" обязательно для заполнения и не может быть пустым');
+        }
+
+        $newComment = trim($data['comment']);
+
+        $bookings = $this->csvService->readBookings();
+        $bookingExists = false;
+        
+        foreach ($bookings as $booking) {
+            if (isset($booking['id']) && (int)$booking['id'] === $id) {
+                $bookingExists = true;
+                break;
             }
+        }
 
-            $newComment = trim($data['comment']);
+        if (!$bookingExists) {
+            throw new HttpException(Response::HTTP_NOT_FOUND, 'Бронирование с ID ' . $id . ' не найдено');
+        }
 
-            $bookings = $this->csvService->readBookings();
-            $bookingExists = false;
-            
-            foreach ($bookings as $booking) {
-                if (isset($booking['id']) && $booking['id'] == $id) {
-                    $bookingExists = true;
-                    break;
-                }
-            }
+        $result = $this->csvService->updateBooking($id, $newComment);
 
-            if (!$bookingExists) {
-                return $this->json([
-                    'success' => false,
-                    'error' => 'Бронирование с ID ' . $id . ' не найдено'
-                ], Response::HTTP_NOT_FOUND);
-            }
-
-            $result = $this->csvService->updateBooking($id, $newComment);
-
-            if ($result) {
-                return $this->json([
-                    'success' => true,
-                    'message' => 'Комментарий бронирования обновлен успешно'
-                ]);
-            } else {
-                return $this->json([
-                    'success' => false,
-                    'error' => 'Ошибка при обновлении бронирования'
-                ], Response::HTTP_INTERNAL_SERVER_ERROR);
-            }
-
-        } catch (\Exception $e) {
+        if ($result) {
             return $this->json([
-                'success' => false,
-                'error' => 'Ошибка при обновлении бронирования: ' . $e->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+                'success' => true,
+                'message' => 'Комментарий бронирования обновлен успешно'
+            ]);
+        } else {
+            throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR, 'Ошибка при обновлении бронирования');
         }
     }
 
@@ -200,21 +150,13 @@ class HousesController extends AbstractController
     #[Route('/api/bookings', name: 'get_bookings', methods: ['GET'])]
     public function getBookings(): JsonResponse
     {
-        try {
-            $bookings = $this->csvService->readBookings();
+        $bookings = $this->csvService->readBookings();
 
-            return $this->json([
-                'success' => true,
-                'data' => $bookings,
-                'count' => count($bookings)
-            ]);
-
-        } catch (\Exception $e) {
-            return $this->json([
-                'success' => false,
-                'error' => 'Ошибка при получении списка бронирований: ' . $e->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        return $this->json([
+            'success' => true,
+            'data' => $bookings,
+            'count' => count($bookings)
+        ]);
     }
 
     /**
@@ -224,28 +166,17 @@ class HousesController extends AbstractController
     #[Route('/api/houses/{id}', name: 'get_house', methods: ['GET'])]
     public function getHouse(int $id): JsonResponse
     {
-        try {
-            $houses = $this->csvService->readHouses();
-            
-            foreach ($houses as $house) {
-                if (isset($house['id']) && $house['id'] == $id) {
-                    return $this->json([
-                        'success' => true,
-                        'data' => $house
-                    ]);
-                }
+        $houses = $this->csvService->readHouses();
+        
+        foreach ($houses as $house) {
+            if (isset($house['id']) && $house['id'] == $id) {
+                return $this->json([
+                    'success' => true,
+                    'data' => $house
+                ]);
             }
-
-            return $this->json([
-                'success' => false,
-                'error' => 'Домик с ID ' . $id . ' не найден'
-            ], Response::HTTP_NOT_FOUND);
-
-        } catch (\Exception $e) {
-            return $this->json([
-                'success' => false,
-                'error' => 'Ошибка при получении информации о домике: ' . $e->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+
+        throw new HttpException(Response::HTTP_NOT_FOUND, 'Домик с ID ' . $id . ' не найден');
     }
 }
