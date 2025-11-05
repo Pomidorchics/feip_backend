@@ -5,7 +5,7 @@ services:
       - "5432"
 ###< doctrine/doctrine-bundle ###
 
-  ###> symfony/mailer ###
+###> symfony/mailer ###
   mailer:
     image: axllent/mailpit
     ports:
