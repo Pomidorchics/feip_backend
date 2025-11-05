@@ -9,10 +9,11 @@
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ChangeMe}
       POSTGRES_USER: ${POSTGRES_USER:-app}
     healthcheck:
-      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB:-app}", "-U", "${POSTGRES_USER:-app}"]
+      test: ["CMD-SHELL", "pg_isready -d ${POSTGRES_DB:-app} -U ${POSTGRES_USER:-app}"]
+      interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 60s
+      start_period: 30s
     volumes:
       - database_data:/var/lib/postgresql/data:rw
     ports:
@@ -41,6 +42,9 @@
     volumes:
       - ${PWD}:/var/www
       - ${PWD}/data:/var/www/data
+    depends_on:
+      database:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "php", "-r", "exit(0);"]
       interval: 10s
@@ -48,6 +52,15 @@
       retries: 5
       start_period: 30s
 ###< php service ###
+
+###> mailer service ###
+  mailer:
+    image: axllent/mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+###< mailer service ###
 
 volumes:
 ###> doctrine/doctrine-bundle ###

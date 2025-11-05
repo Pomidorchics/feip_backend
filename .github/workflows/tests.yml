@@ -1,0 +1,75 @@
+name: PHP Tests
+
+on:
+  push:
+    branches: [ main, dev, master ]
+  pull_request:
+    branches: [ main, dev, master ]
+
+jobs:
+  test:
+    name: PHPUnit Tests
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: test_db
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo, pdo_pgsql, dom, zip, curl
+        coverage: none
+
+    - name: Validate composer.json and composer.lock
+      run: composer validate --strict
+
+    - name: Cache Composer packages
+      id: composer-cache
+      uses: actions/cache@v3
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-
+
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-interaction
+
+    - name: Create .env.test file
+      run: |
+        cp .env .env.test
+        echo "DATABASE_URL=\"postgresql://test_user:test_password@localhost:5432/test_db?serverVersion=16&charset=utf8\"" >> .env.test
+        echo "APP_ENV=test" >> .env.test
+        echo "APP_SECRET=test_secret_123" >> .env.test
+
+    - name: Create test database
+      run: |
+        php bin/console doctrine:database:create --env=test
+        php bin/console doctrine:migrations:migrate --env=test -n
+
+    - name: Run PHPUnit tests
+      run: php bin/phpunit --testdox
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: test-results
+        path: var/log/test.log
