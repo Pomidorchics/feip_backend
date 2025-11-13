@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Service\CSVService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\Routing\Annotation\Route;
 
 class HousesController extends AbstractController
 {
@@ -27,7 +29,7 @@ class HousesController extends AbstractController
     public function getAvailableHouses(): JsonResponse
     {
         $houses = $this->csvService->readHouses();
-        $availableHouses = array_filter($houses, function($house) {
+        $availableHouses = array_filter($houses, function ($house) {
             return isset($house['is_available']) && $house['is_available'] == '1';
         });
 
@@ -112,14 +114,17 @@ class HousesController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         if (!isset($data['comment']) || empty(trim($data['comment']))) {
-            throw new HttpException(Response::HTTP_BAD_REQUEST, 'Поле "comment" обязательно для заполнения и не может быть пустым');
+            throw new HttpException(
+                Response::HTTP_BAD_REQUEST,
+                'Поле "comment" обязательно для заполнения и не может быть пустым'
+            );
         }
 
         $newComment = trim($data['comment']);
 
         $bookings = $this->csvService->readBookings();
         $bookingExists = false;
-        
+
         foreach ($bookings as $booking) {
             if (isset($booking['id']) && (int)$booking['id'] === $id) {
                 $bookingExists = true;
@@ -167,7 +172,7 @@ class HousesController extends AbstractController
     public function getHouse(int $id): JsonResponse
     {
         $houses = $this->csvService->readHouses();
-        
+
         foreach ($houses as $house) {
             if (isset($house['id']) && $house['id'] == $id) {
                 return $this->json([

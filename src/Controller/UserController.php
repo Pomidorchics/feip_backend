@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Entity\User;
@@ -20,7 +22,8 @@ class UserController extends AbstractController
         private UserRepository $userRepository,
         private EntityManagerInterface $entityManager,
         private ValidatorInterface $validator
-    ) {}
+    ) {
+    }
 
     #[Route('', name: 'user_create', methods: ['POST'])]
     public function create(Request $request): JsonResponse

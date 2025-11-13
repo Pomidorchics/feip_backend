@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Tests\Controller;
 
-use App\Entity\User;
 use App\Entity\House;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Override;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class BookingControllerTest extends WebTestCase
@@ -12,11 +15,12 @@ class BookingControllerTest extends WebTestCase
     private $client;
     private $entityManager;
 
+    #[Override]
     protected function setUp(): void
     {
         $this->client = static::createClient();
         $this->entityManager = self::getContainer()->get(EntityManagerInterface::class);
-        
+
         $this->cleanDatabase();
     }
 
@@ -26,7 +30,7 @@ class BookingControllerTest extends WebTestCase
         $connection->executeQuery('DELETE FROM booking');
         $connection->executeQuery('DELETE FROM users');
         $connection->executeQuery('DELETE FROM house');
-        
+
         $connection->executeQuery('ALTER SEQUENCE booking_id_seq RESTART WITH 1');
         $connection->executeQuery('ALTER SEQUENCE users_id_seq RESTART WITH 1');
         $connection->executeQuery('ALTER SEQUENCE house_id_seq RESTART WITH 1');
@@ -41,10 +45,10 @@ class BookingControllerTest extends WebTestCase
         $house->setDistanceToSea(1);
         $house->setPricePerNight(1000);
         $house->setIsAvailable(true);
-        
+
         $this->entityManager->persist($house);
         $this->entityManager->flush();
-        
+
         return $house;
     }
 
@@ -54,10 +58,10 @@ class BookingControllerTest extends WebTestCase
         $user->setName('Test User');
         $user->setEmail('test@example.com');
         $user->setPhone('+79161234567');
-        
+
         $this->entityManager->persist($user);
         $this->entityManager->flush();
-        
+
         return $user;
     }
 
@@ -82,7 +86,7 @@ class BookingControllerTest extends WebTestCase
         );
 
         $this->assertResponseStatusCodeSame(201);
-        
+
         $response = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertTrue($response['success']);
         $this->assertArrayHasKey('id', $response['data']);
@@ -111,6 +115,7 @@ class BookingControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(404);
     }
 
+    #[Override]
     protected static function getKernelClass(): string
     {
         return \App\Kernel::class;

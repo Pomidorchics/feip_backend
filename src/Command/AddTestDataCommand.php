@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Command;
 
 use App\Entity\House;
-use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Override;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -23,15 +25,34 @@ class AddTestDataCommand extends Command
         parent::__construct();
     }
 
+    #[Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
         $houses = [
-            ['name' => 'Дом у моря', 'beds' => 2, 'amenities' => 'санузел,душевая кабина', 'distanceToSea' => 1, 'pricePerNight' => 5000],
-            ['name' => 'Большой дом', 'beds' => 4, 'amenities' => 'санузел,кухня', 'distanceToSea' => 3, 'pricePerNight' => 3000],
-            ['name' => 'Люкс', 'beds' => 3, 'amenities' => 'санузел,душевая кабина,кондиционер', 'distanceToSea' => 2, 'pricePerNight' => 7000],
-        ];
+                        [
+                            'name' => 'Дом у моря',
+                            'beds' => 2,
+                            'amenities' => 'санузел,душевая кабина',
+                            'distanceToSea' => 1,
+                            'pricePerNight' => 5000
+                        ],
+                        [
+                            'name' => 'Большой дом',
+                            'beds' => 4,
+                            'amenities' => 'санузел,кухня',
+                            'distanceToSea' => 3,
+                            'pricePerNight' => 3000
+                        ],
+                        [
+                            'name' => 'Люкс',
+                            'beds' => 3,
+                            'amenities' => 'санузел,душевая кабина,кондиционер',
+                            'distanceToSea' => 2,
+                            'pricePerNight' => 7000
+                        ],
+                    ];
 
         foreach ($houses as $houseData) {
             $house = new House();

@@ -1,12 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
-use App\Entity\Booking;
-use App\Entity\User;
-use App\Entity\House;
-use App\Repository\UserRepository;
 use App\Repository\HouseRepository;
+use App\Repository\UserRepository;
 use App\Service\BookingService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -24,7 +23,8 @@ class BookingController extends AbstractController
         private UserRepository $userRepository,
         private HouseRepository $houseRepository,
         private EntityManagerInterface $entityManager
-    ) {}
+    ) {
+    }
 
     #[Route('', name: 'booking_create', methods: ['POST'])]
     public function create(Request $request): JsonResponse
@@ -52,7 +52,7 @@ class BookingController extends AbstractController
         $comment = $data['comment'] ?? '';
 
         $booking = $this->bookingService->createBooking($user, $house, $comment);
-        
+
         return $this->json([
             'success' => true,
             'data' => [
