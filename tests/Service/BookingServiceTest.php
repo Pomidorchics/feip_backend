@@ -1,12 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Tests\Service;
 
 use App\Entity\Booking;
-use App\Entity\User;
 use App\Entity\House;
+use App\Entity\User;
 use App\Service\BookingService;
 use Doctrine\ORM\EntityManagerInterface;
+use Override;
 use PHPUnit\Framework\TestCase;
 
 class BookingServiceTest extends TestCase
@@ -14,6 +17,7 @@ class BookingServiceTest extends TestCase
     private $entityManager;
     private $bookingService;
 
+    #[Override]
     protected function setUp(): void
     {
         $this->entityManager = $this->createMock(EntityManagerInterface::class);

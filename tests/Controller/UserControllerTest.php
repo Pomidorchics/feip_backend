@@ -1,22 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Tests\Controller;
 
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Override;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\HttpFoundation\Response;
 
 class UserControllerTest extends WebTestCase
 {
     private $client;
     private $entityManager;
 
+    #[Override]
     protected function setUp(): void
     {
         $this->client = static::createClient();
         $this->entityManager = self::getContainer()->get(EntityManagerInterface::class);
-        
+
         $this->cleanDatabase();
     }
 
@@ -26,7 +29,7 @@ class UserControllerTest extends WebTestCase
         $connection->executeQuery('DELETE FROM booking');
         $connection->executeQuery('DELETE FROM users');
         $connection->executeQuery('DELETE FROM house');
-        
+
         $connection->executeQuery('ALTER SEQUENCE booking_id_seq RESTART WITH 1');
         $connection->executeQuery('ALTER SEQUENCE users_id_seq RESTART WITH 1');
         $connection->executeQuery('ALTER SEQUENCE house_id_seq RESTART WITH 1');
@@ -50,7 +53,7 @@ class UserControllerTest extends WebTestCase
         );
 
         $this->assertResponseStatusCodeSame(201);
-        
+
         $response = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertTrue($response['success']);
         $this->assertArrayHasKey('id', $response['data']);
@@ -103,6 +106,7 @@ class UserControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
     }
 
+    #[Override]
     protected static function getKernelClass(): string
     {
         return \App\Kernel::class;
