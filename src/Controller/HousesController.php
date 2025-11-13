@@ -133,7 +133,7 @@ class HousesController extends AbstractController
         }
 
         if (!$bookingExists) {
-            throw new HttpException(Response::HTTP_NOT_FOUND, 'Бронирование с ID ' . $id . ' не найдено');
+            throw new HttpException(Response::HTTP_NOT_FOUND, 'Бронирование с ID ' . (string)$id . ' не найдено');
         }
 
         $result = $this->csvService->updateBooking($id, $newComment);
@@ -182,6 +182,6 @@ class HousesController extends AbstractController
             }
         }
 
-        throw new HttpException(Response::HTTP_NOT_FOUND, 'Домик с ID ' . $id . ' не найден');
+        throw new HttpException(Response::HTTP_NOT_FOUND, 'Домик с ID ' . (string)$id . ' не найден');
     }
 }
