@@ -9,11 +9,14 @@ use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'users')]
-class User
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -23,19 +26,29 @@ class User
 
     #[ORM\Column(length: 255)]
     #[Groups(['user:read', 'user:write', 'booking:read'])]
+    #[Assert\NotBlank(message: 'Имя обязательно для заполнения')]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, unique: true)]
     #[Groups(['user:read', 'user:write'])]
+    #[Assert\NotBlank(message: 'Email обязателен для заполнения')]
+    #[Assert\Email(message: 'Некорректный формат email')]
     private ?string $email = null;
 
     #[ORM\Column(length: 20)]
     #[Groups(['user:read', 'user:write', 'booking:read'])]
+    #[Assert\NotBlank(message: 'Телефон обязателен для заполнения')]
     private ?string $phone = null;
 
     #[ORM\Column]
     #[Groups(['user:read'])]
     private ?DateTimeImmutable $createdAt = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $password = null;
+
+    #[ORM\Column(type: 'json')]
+    private array $roles = [];
 
     /**
      * @var Collection<int, Booking>
@@ -47,6 +60,7 @@ class User
     {
         $this->bookings = new ArrayCollection();
         $this->createdAt = new DateTimeImmutable();
+        $this->roles = ['ROLE_USER'];
     }
 
     public function getId(): ?int
@@ -101,6 +115,38 @@ class User
 
         return $this;
     }
+
+    public function getPassword(): ?string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(string $password): static
+    {
+        $this->password = $password;
+        return $this;
+    }
+
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
+        return $this;
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->phone;
+    }
+
+    public function eraseCredentials(): void {}
 
     /**
      * @return Collection<int, Booking>
