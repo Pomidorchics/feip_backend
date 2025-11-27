@@ -1,0 +1,20 @@
+api_platform:
+    title: 'API Бронирования домиков'
+    version: 1.0.0
+    defaults:
+        stateless: true
+        cache_headers:
+            vary: ['Content-Type', 'Authorization', 'Origin']
+    mapping:
+        paths: ['%kernel.project_dir%/src/Entity']
+    formats:
+        json:
+            mime_types: ['application/json']
+        jsonld:
+            mime_types: ['application/ld+json']
+        html:
+            mime_types: ['text/html']
+    docs_formats:
+        json: ['application/json']
+        jsonld: ['application/ld+json']
+        html: ['text/html']

@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
 use App\Repository\BookingRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: BookingRepository::class)]
+#[ApiResource]
 class Booking
 {
     #[ORM\Id]
@@ -30,17 +32,17 @@ class Booking
     private ?DateTimeImmutable $updatedAt = null;
 
     #[ORM\Column(length: 20)]
-    #[Groups(['booking:read'])]
+    #[Groups(['booking:read', 'booking:write'])]
     private ?string $status = null;
 
     #[ORM\ManyToOne(inversedBy: 'bookings')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['booking:read'])]
+    #[Groups(['booking:read', 'booking:write'])]
     private ?User $customer = null;
 
     #[ORM\ManyToOne(inversedBy: 'bookings')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['booking:read'])]
+    #[Groups(['booking:read', 'booking:write'])]
     private ?House $house = null;
 
     public function __construct()
