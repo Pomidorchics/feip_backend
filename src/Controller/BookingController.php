@@ -12,6 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/api/bookings')]
@@ -31,33 +32,21 @@ class BookingController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         if (!isset($data['user_id']) || !isset($data['house_id'])) {
-            return new JsonResponse([
-                'success' => false,
-                'message' => 'Поля user_id и house_id обязательны'
-            ], Response::HTTP_BAD_REQUEST);
+            throw new HttpException(Response::HTTP_BAD_REQUEST, 'Поля user_id и house_id обязательны');
         }
 
         $user = $this->userRepository->find($data['user_id']);
         if (!$user) {
-            return new JsonResponse([
-                'success' => false,
-                'message' => 'Пользователь не найден'
-            ], Response::HTTP_NOT_FOUND);
+            throw new HttpException(Response::HTTP_NOT_FOUND, 'Пользователь не найден');
         }
 
         $house = $this->houseRepository->find($data['house_id']);
         if (!$house) {
-            return new JsonResponse([
-                'success' => false,
-                'message' => 'Домик не найден'
-            ], Response::HTTP_NOT_FOUND);
+            throw new HttpException(Response::HTTP_NOT_FOUND, 'Домик не найден');
         }
 
         if (!$house->isAvailable()) {
-            return new JsonResponse([
-                'success' => false,
-                'message' => 'Домик недоступен для бронирования'
-            ], Response::HTTP_BAD_REQUEST);
+            throw new HttpException(Response::HTTP_BAD_REQUEST, 'Домик недоступен для бронирования');
         }
 
         $comment = $data['comment'] ?? '';
