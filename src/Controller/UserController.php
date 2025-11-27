@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Entity\User;
@@ -9,7 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -19,21 +21,37 @@ class UserController extends AbstractController
     public function __construct(
         private UserRepository $userRepository,
         private EntityManagerInterface $entityManager,
-        private ValidatorInterface $validator
-    ) {}
+        private ValidatorInterface $validator,
+        private UserPasswordHasherInterface $passwordHasher
+    ) {
+    }
 
     #[Route('', name: 'user_create', methods: ['POST'])]
     public function create(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
-        if (!isset($data['name']) || !isset($data['email']) || !isset($data['phone'])) {
-            throw new HttpException(Response::HTTP_BAD_REQUEST, 'Поля name, email и phone обязательны');
+        if (!isset($data['name']) || !isset($data['email']) || !isset($data['phone']) || !isset($data['password'])) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Поля name, email, phone и password обязательны'
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         $existingUser = $this->userRepository->findOneBy(['email' => $data['email']]);
         if ($existingUser) {
-            throw new HttpException(Response::HTTP_CONFLICT, 'Пользователь с таким email уже существует');
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Пользователь с таким email уже существует'
+            ], Response::HTTP_CONFLICT);
+        }
+
+        $existingUserByPhone = $this->userRepository->findOneBy(['phone' => $data['phone']]);
+        if ($existingUserByPhone) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Пользователь с таким телефоном уже существует'
+            ], Response::HTTP_CONFLICT);
         }
 
         $user = new User();
@@ -41,13 +59,23 @@ class UserController extends AbstractController
         $user->setEmail($data['email']);
         $user->setPhone($data['phone']);
 
+        $hashedPassword = $this->passwordHasher->hashPassword($user, $data['password']);
+        $user->setPassword($hashedPassword);
+
+        if (isset($data['roles'])) {
+            $user->setRoles((array)$data['roles']);
+        }
+
         $errors = $this->validator->validate($user);
         if (count($errors) > 0) {
             $errorMessages = [];
             foreach ($errors as $error) {
                 $errorMessages[] = $error->getMessage();
             }
-            throw new HttpException(Response::HTTP_BAD_REQUEST, implode(', ', $errorMessages));
+            return new JsonResponse([
+                'success' => false,
+                'message' => implode(', ', $errorMessages)
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         $this->entityManager->persist($user);
@@ -59,7 +87,8 @@ class UserController extends AbstractController
                 'id' => $user->getId(),
                 'name' => $user->getName(),
                 'email' => $user->getEmail(),
-                'phone' => $user->getPhone()
+                'phone' => $user->getPhone(),
+                'roles' => $user->getRoles()
             ]
         ], Response::HTTP_CREATED);
     }

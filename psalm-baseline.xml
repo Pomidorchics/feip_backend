@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files psalm-version="6.13.1@1e3b7f0a8ab32b23197b91107adc0a7ed8a05b51">
+  <file src="src/Command/AddTestDataCommand.php">
+    <UnusedClass>
+      <code><![CDATA[AddTestDataCommand]]></code>
+    </UnusedClass>
+  </file>
+  <file src="src/Controller/AuthController.php">
+    <UnusedClass>
+      <code><![CDATA[AuthController]]></code>
+    </UnusedClass>
+  </file>
+  <file src="src/Controller/BookingController.php">
+    <UnusedClass>
+      <code><![CDATA[BookingController]]></code>
+    </UnusedClass>
+  </file>
+  <file src="src/Controller/HousesController.php">
+    <UnusedClass>
+      <code><![CDATA[HousesController]]></code>
+    </UnusedClass>
+  </file>
+  <file src="src/Controller/UserController.php">
+    <UnusedClass>
+      <code><![CDATA[UserController]]></code>
+    </UnusedClass>
+  </file>
+  <file src="src/Entity/Booking.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[getUpdatedAt]]></code>
+      <code><![CDATA[setCreatedAt]]></code>
+      <code><![CDATA[setStatus]]></code>
+      <code><![CDATA[setUpdatedAt]]></code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Entity/House.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[addBooking]]></code>
+      <code><![CDATA[getAmenities]]></code>
+      <code><![CDATA[getBeds]]></code>
+      <code><![CDATA[getBookings]]></code>
+      <code><![CDATA[getDistanceToSea]]></code>
+      <code><![CDATA[getPricePerNight]]></code>
+      <code><![CDATA[removeBooking]]></code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Entity/User.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[addBooking]]></code>
+      <code><![CDATA[getBookings]]></code>
+      <code><![CDATA[getCreatedAt]]></code>
+      <code><![CDATA[removeBooking]]></code>
+      <code><![CDATA[setCreatedAt]]></code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Repository/BookingRepository.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[__construct]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedParam>
+      <code><![CDATA[$registry]]></code>
+    </PossiblyUnusedParam>
+  </file>
+  <file src="src/Repository/HouseRepository.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[__construct]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedParam>
+      <code><![CDATA[$registry]]></code>
+    </PossiblyUnusedParam>
+  </file>
+  <file src="src/Repository/UserRepository.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[__construct]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedParam>
+      <code><![CDATA[$registry]]></code>
+    </PossiblyUnusedParam>
+  </file>
+  <file src="src/Security/JwtAuthenticator.php">
+    <UnusedProperty>
+      <code><![CDATA[$entityManager]]></code>
+    </UnusedProperty>
+  </file>
+  <file src="src/Service/CSVService.php">
+    <InvalidArrayOffset>
+      <code><![CDATA[$orderedRow[$header]]]></code>
+    </InvalidArrayOffset>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[__construct]]></code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Service/JwtService.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[__construct]]></code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="tests/Controller/AuthControllerTest.php">
+    <UnusedClass>
+      <code><![CDATA[AuthControllerTest]]></code>
+    </UnusedClass>
+    <UnusedMethodCall>
+      <code><![CDATA[setAccessible]]></code>
+    </UnusedMethodCall>
+  </file>
+  <file src="tests/Controller/BookingControllerTest.php">
+    <UnusedClass>
+      <code><![CDATA[BookingControllerTest]]></code>
+    </UnusedClass>
+  </file>
+  <file src="tests/Controller/UserControllerTest.php">
+    <UnusedClass>
+      <code><![CDATA[UserControllerTest]]></code>
+    </UnusedClass>
+  </file>
+  <file src="tests/Security/JwtAuthenticatorTest.php">
+    <UnusedClass>
+      <code><![CDATA[JwtAuthenticatorTest]]></code>
+    </UnusedClass>
+  </file>
+  <file src="tests/Service/BookingServiceTest.php">
+    <UnusedClass>
+      <code><![CDATA[BookingServiceTest]]></code>
+    </UnusedClass>
+  </file>
+</files>

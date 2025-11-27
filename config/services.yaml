@@ -4,6 +4,7 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    jwt_secret: '%env(JWT_SECRET)%'
 
 services:
     # default configuration for services in *this* file
@@ -23,6 +24,17 @@ services:
     App\Service\CSVService:
         arguments:
             $projectDir: '%kernel.project_dir%'
+
+    App\Service\JwtService:
+        arguments:
+            $secretKey: '%env(JWT_SECRET)%'
+    
+    App\Security\JwtAuthenticator:
+        arguments:
+            $userRepository: '@App\Repository\UserRepository'
+            $entityManager: '@Doctrine\ORM\EntityManagerInterface'
+            $jwtService: '@App\Service\JwtService'
+        tags: ['security.authenticator']
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

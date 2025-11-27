@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Service;
 
 use Carbon\Carbon;
@@ -19,11 +21,11 @@ class CSVService
     public function readHouses(): array
     {
         $filePath = $this->projectDir . '/data/houses.csv';
-        
+
         if (!file_exists($filePath)) {
             $this->createDefaultHousesFile($filePath);
         }
-        
+
         return $this->readCSV($filePath);
     }
 
@@ -33,7 +35,7 @@ class CSVService
     public function readBookings(): array
     {
         $filePath = $this->projectDir . '/data/bookings.csv';
-        
+
         if (!file_exists($filePath)) {
             $this->createEmptyBookingsFile($filePath);
             return [];
@@ -48,18 +50,18 @@ class CSVService
     public function addBooking(array $bookingData): int
     {
         $filePath = $this->projectDir . '/data/bookings.csv';
-        
+
         $bookings = $this->readBookings();
-        
+
         $newId = 1;
         if (!empty($bookings)) {
             $ids = array_column($bookings, 'id');
             $ids = array_map('intval', $ids);
-            
+
             $maxId = !empty($ids) ? max($ids) : 0;
             $newId = $maxId + 1;
         }
-        
+
         $fullBookingData = [
             'id' => $newId,
             'house_id' => $bookingData['house_id'],
@@ -71,7 +73,7 @@ class CSVService
         ];
 
         $bookings[] = $fullBookingData;
-        
+
         $this->writeCSV($filePath, $bookings);
 
         return $newId;
@@ -190,15 +192,15 @@ class CSVService
         }
 
         $rows = [];
-        if (($handle = fopen($filePath, 'r')) !== FALSE) {
+        if (($handle = fopen($filePath, 'r')) !== false) {
             $headers = fgetcsv($handle);
-            
-            if ($headers === FALSE) {
+
+            if ($headers === false) {
                 fclose($handle);
                 return [];
             }
 
-            while (($data = fgetcsv($handle)) !== FALSE) {
+            while (($data = fgetcsv($handle)) !== false) {
                 if (count($headers) === count($data)) {
                     $rows[] = array_combine($headers, $data);
                 }
@@ -223,10 +225,10 @@ class CSVService
             mkdir($dir, 0755, true);
         }
 
-        if (($handle = fopen($filePath, 'w')) !== FALSE) {
+        if (($handle = fopen($filePath, 'w')) !== false) {
             $headers = array_keys($data[0]);
             fputcsv($handle, $headers);
-            
+
             foreach ($data as $row) {
                 $orderedRow = [];
                 foreach ($headers as $header) {
@@ -234,9 +236,9 @@ class CSVService
                 }
                 fputcsv($handle, $orderedRow);
             }
-            
+
             fclose($handle);
-            
+
             if (filesize($filePath) > 0) {
                 return true;
             }
