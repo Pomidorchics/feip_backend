@@ -39,7 +39,7 @@ class JwtService
     public function validateToken(string $token): bool
     {
         $parts = explode('.', $token);
-        
+
         if (count($parts) !== 3) {
             return false;
         }

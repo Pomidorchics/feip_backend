@@ -6,6 +6,7 @@ namespace App\Tests\Controller;
 
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Override;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class UserControllerTest extends WebTestCase
@@ -13,6 +14,7 @@ class UserControllerTest extends WebTestCase
     private $client;
     private $entityManager;
 
+    #[Override]
     protected function setUp(): void
     {
         $this->client = static::createClient();
@@ -85,7 +87,7 @@ class UserControllerTest extends WebTestCase
         );
 
         $this->assertResponseStatusCodeSame(409);
-        
+
         $response = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertFalse($response['success']);
         $this->assertStringContainsString('уже существует', $response['message']);
@@ -119,7 +121,7 @@ class UserControllerTest extends WebTestCase
         );
 
         $this->assertResponseStatusCodeSame(409);
-        
+
         $response = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertFalse($response['success']);
         $this->assertStringContainsString('телефоном', $response['message']);
@@ -144,7 +146,7 @@ class UserControllerTest extends WebTestCase
         );
 
         $this->assertResponseStatusCodeSame(400);
-        
+
         $response = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertFalse($response['success']);
         $this->assertStringContainsString('обязательны', $response['message']);
@@ -169,7 +171,7 @@ class UserControllerTest extends WebTestCase
         );
 
         $this->assertResponseStatusCodeSame(400);
-        
+
         $response = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertFalse($response['success']);
     }
@@ -188,7 +190,7 @@ class UserControllerTest extends WebTestCase
         );
 
         $this->assertResponseStatusCodeSame(400);
-        
+
         $response = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertFalse($response['success']);
     }

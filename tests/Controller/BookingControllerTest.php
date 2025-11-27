@@ -8,6 +8,7 @@ use App\Entity\House;
 use App\Entity\User;
 use App\Service\JwtService;
 use Doctrine\ORM\EntityManagerInterface;
+use Override;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class BookingControllerTest extends WebTestCase
@@ -16,6 +17,7 @@ class BookingControllerTest extends WebTestCase
     private $entityManager;
     private $jwtService;
 
+    #[Override]
     protected function setUp(): void
     {
         $this->client = static::createClient();
@@ -123,7 +125,7 @@ class BookingControllerTest extends WebTestCase
         );
 
         $this->assertResponseStatusCodeSame(404);
-        
+
         $response = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertFalse($response['success']);
         $this->assertStringContainsString('Пользователь не найден', $response['message']);
@@ -154,7 +156,7 @@ class BookingControllerTest extends WebTestCase
         );
 
         $this->assertResponseStatusCodeSame(404);
-        
+
         $response = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertFalse($response['success']);
         $this->assertStringContainsString('Домик не найден', $response['message']);

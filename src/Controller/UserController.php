@@ -58,7 +58,7 @@ class UserController extends AbstractController
         $user->setName($data['name']);
         $user->setEmail($data['email']);
         $user->setPhone($data['phone']);
-        
+
         $hashedPassword = $this->passwordHasher->hashPassword($user, $data['password']);
         $user->setPassword($hashedPassword);
 

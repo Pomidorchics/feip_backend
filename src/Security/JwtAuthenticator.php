@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Security;
 
-use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Service\JwtService;
 use Doctrine\ORM\EntityManagerInterface;
+use Override;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -28,34 +28,36 @@ class JwtAuthenticator extends AbstractAuthenticator
     ) {
     }
 
+    #[Override]
     public function supports(Request $request): ?bool
     {
-        return $request->headers->has('Authorization') && 
+        return $request->headers->has('Authorization') &&
                str_starts_with($request->headers->get('Authorization'), 'Bearer ');
     }
 
+    #[Override]
     public function authenticate(Request $request): Passport
     {
         $authorizationHeader = $request->headers->get('Authorization');
-        
+
         if (!$authorizationHeader || !str_starts_with($authorizationHeader, 'Bearer ')) {
             throw new CustomUserMessageAuthenticationException('No API token provided');
         }
 
         $token = substr($authorizationHeader, 7);
-        
+
         if (!$this->jwtService->validateToken($token)) {
             throw new CustomUserMessageAuthenticationException('Invalid token');
         }
 
         $payload = $this->jwtService->getPayload($token);
-        
+
         if (!$payload) {
             throw new CustomUserMessageAuthenticationException('Invalid token payload');
         }
 
         $userIdentifier = $payload['phone'] ?? null;
-        
+
         if (!$userIdentifier) {
             throw new CustomUserMessageAuthenticationException('User identifier not found in token');
         }
@@ -67,11 +69,13 @@ class JwtAuthenticator extends AbstractAuthenticator
         );
     }
 
+    #[Override]
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         return null;
     }
 
+    #[Override]
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
         return new JsonResponse([

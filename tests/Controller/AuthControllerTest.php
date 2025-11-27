@@ -7,6 +7,8 @@ namespace App\Tests\Controller;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Service\JwtService;
+use Override;
+use ReflectionClass;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,6 +20,7 @@ class AuthControllerTest extends WebTestCase
     private JwtService $jwtService;
     private $entityManager;
 
+    #[Override]
     protected function setUp(): void
     {
         $this->client = static::createClient();
@@ -58,7 +61,7 @@ class AuthControllerTest extends WebTestCase
     {
         // Arrange
         $user = $this->createTestUser();
-        
+
         $loginData = [
             'phone' => '+79991234567',
             'password' => 'password123'
@@ -94,7 +97,7 @@ class AuthControllerTest extends WebTestCase
     {
         // Arrange
         $this->createTestUser();
-        
+
         $loginData = [
             'phone' => '+79998887766',
             'password' => 'password123'
@@ -111,15 +114,15 @@ class AuthControllerTest extends WebTestCase
         );
 
         $response = $this->client->getResponse();
-        echo "Status Code: " . $response->getStatusCode() . "\n";
-        echo "Response Content: " . $response->getContent() . "\n";
-        
+        echo 'Status Code: ' . $response->getStatusCode() . "\n";
+        echo 'Response Content: ' . $response->getContent() . "\n";
+
         // Assert
         $this->assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
         $responseData = json_decode($response->getContent(), true);
-        
-        $this->assertNotNull($responseData, "Response should be valid JSON");
-        $this->assertIsArray($responseData, "Response should be an array");
+
+        $this->assertNotNull($responseData, 'Response should be valid JSON');
+        $this->assertIsArray($responseData, 'Response should be an array');
         $this->assertArrayHasKey('success', $responseData);
         $this->assertFalse($responseData['success']);
     }
@@ -128,7 +131,7 @@ class AuthControllerTest extends WebTestCase
     {
         // Arrange
         $this->createTestUser();
-        
+
         $loginData = [
             'phone' => '+79991234567',
             'password' => 'wrongpassword'
@@ -147,7 +150,7 @@ class AuthControllerTest extends WebTestCase
         // Assert
         $this->assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
         $responseData = json_decode($this->client->getResponse()->getContent(), true);
-        
+
         $this->assertArrayHasKey('success', $responseData);
         $this->assertFalse($responseData['success']);
         $this->assertStringContainsString('Неверный телефон или пароль', $responseData['message']);
@@ -232,21 +235,21 @@ class AuthControllerTest extends WebTestCase
 
         // Assert
         $this->assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
-        
+
         $responseContent = $this->client->getResponse()->getContent();
-        
+
         if (empty($responseContent)) {
             echo "DEBUG testGetMeWithoutToken: Empty response\n";
             return;
         }
-        
+
         $responseData = json_decode($responseContent, true);
-        
+
         if ($responseData === null) {
-            echo "DEBUG testGetMeWithoutToken: Not JSON, got: " . $responseContent . "\n";
+            echo 'DEBUG testGetMeWithoutToken: Not JSON, got: ' . $responseContent . "\n";
             return;
         }
-        
+
         $this->assertArrayHasKey('success', $responseData);
         $this->assertFalse($responseData['success']);
     }
@@ -268,7 +271,7 @@ class AuthControllerTest extends WebTestCase
         // Assert
         $this->assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
         $responseData = json_decode($this->client->getResponse()->getContent(), true);
-        
+
         $this->assertFalse($responseData['success']);
     }
 
@@ -276,7 +279,7 @@ class AuthControllerTest extends WebTestCase
     {
         // Arrange
         $user = $this->createTestUser();
-        
+
         $header = $this->base64UrlEncode(json_encode(['alg' => 'HS256', 'typ' => 'JWT']));
         $payload = $this->base64UrlEncode(json_encode([
             'user_id' => $user->getId(),
@@ -284,14 +287,14 @@ class AuthControllerTest extends WebTestCase
             'roles' => $user->getRoles(),
             'exp' => time() - 3600 // expired 1 hour ago
         ]));
-        
+
         $jwtService = static::getContainer()->get(JwtService::class);
         $secretKey = $this->getPrivateProperty($jwtService, 'secretKey');
-        
+
         $signature = $this->base64UrlEncode(
             hash_hmac('sha256', "$header.$payload", $secretKey, true)
         );
-        
+
         $expiredToken = "$header.$payload.$signature";
 
         // Act
@@ -340,7 +343,7 @@ class AuthControllerTest extends WebTestCase
     {
         // Arrange
         $user = $this->createTestUser();
-        
+
         // Act
         $token = $this->jwtService->generateToken($user);
         $payload = $this->jwtService->getPayload($token);
@@ -411,10 +414,10 @@ class AuthControllerTest extends WebTestCase
 
     private function getPrivateProperty(object $object, string $propertyName)
     {
-        $reflection = new \ReflectionClass($object);
+        $reflection = new ReflectionClass($object);
         $property = $reflection->getProperty($propertyName);
         $property->setAccessible(true);
-        
+
         return $property->getValue($object);
     }
 }

@@ -9,6 +9,7 @@ use App\Repository\UserRepository;
 use App\Security\JwtAuthenticator;
 use App\Service\JwtService;
 use Doctrine\ORM\EntityManagerInterface;
+use Override;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,16 +19,17 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 class JwtAuthenticatorTest extends KernelTestCase
 {
     private JwtAuthenticator $authenticator;
-    
+
     /** @var UserRepository&MockObject */
     private $userRepositoryMock;
-    
+
     /** @var JwtService&MockObject */
     private $jwtServiceMock;
-    
+
     /** @var EntityManagerInterface&MockObject */
     private $entityManagerMock;
 
+    #[Override]
     protected function setUp(): void
     {
         $this->userRepositoryMock = $this->createMock(UserRepository::class);
