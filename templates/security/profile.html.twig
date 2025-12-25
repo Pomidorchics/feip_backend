@@ -1,0 +1,57 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Мой профиль{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Мой профиль</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            {% if user.avatar %}
+                                <img src="{{ user.avatar }}" alt="Avatar" class="img-fluid rounded-circle mb-3" style="max-width: 150px;">
+                            {% endif %}
+                            <h4>{{ user.name }}</h4>
+                        </div>
+                        <div class="col-md-8">
+                            <table class="table">
+                                <tr>
+                                    <th>Email:</th>
+                                    <td>{{ user.email }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Телефон:</th>
+                                    <td>{{ user.phone }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Дата регистрации:</th>
+                                    <td>{{ user.createdAt|date('d.m.Y H:i') }}</td>
+                                </tr>
+                                {% if user.googleId %}
+                                <tr>
+                                    <th>Google ID:</th>
+                                    <td>
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-google"></i> Привязан
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                            
+                            <div class="mt-4">
+                                <a href="{{ path('app_logout') }}" class="btn btn-danger">Выйти</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

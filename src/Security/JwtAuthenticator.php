@@ -31,8 +31,11 @@ class JwtAuthenticator extends AbstractAuthenticator
     #[Override]
     public function supports(Request $request): ?bool
     {
-        return $request->headers->has('Authorization') &&
+        if (str_starts_with($request->getPathInfo(), '/api')) {
+            return $request->headers->has('Authorization') &&
                str_starts_with($request->headers->get('Authorization'), 'Bearer ');
+        }
+        return false;
     }
 
     #[Override]
