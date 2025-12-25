@@ -4,6 +4,14 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
+use App\Controller\UserController;
 use App\Repository\UserRepository;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -17,6 +25,41 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'users')]
+#[ApiResource(
+    operations: [
+        new Get(
+            name: 'get_user',
+            uriTemplate: '/api/users/{id}',
+            controller: UserController::class . '::getUser'
+        ),
+        new GetCollection(
+            name: 'get_users',
+            uriTemplate: '/api/users',
+            controller: UserController::class . '::getUsers'
+        ),
+        new Post(
+            name: 'create_user',
+            uriTemplate: '/api/users',
+            controller: UserController::class . '::createUser'
+        ),
+        new Put(
+            name: 'update_user',
+            uriTemplate: '/api/users/{id}',
+            controller: UserController::class . '::updateUser'
+        ),
+        new Patch(
+            name: 'partial_update_user',
+            uriTemplate: '/api/users/{id}',
+            controller: UserController::class . '::partialUpdateUser'
+        ),
+        new Delete(
+            name: 'delete_user',
+            uriTemplate: '/api/users/{id}',
+            controller: UserController::class . '::deleteUser'
+        )
+    ],
+)]
+
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -46,15 +89,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['user:write'])]
     private ?string $password = null;
 
     #[ORM\Column(type: 'json')]
+    #[Groups(['user:read', 'user:write'])]
     private array $roles = [];
 
     /**
      * @var Collection<int, Booking>
      */
     #[ORM\OneToMany(targetEntity: Booking::class, mappedBy: 'customer')]
+    #[Groups(['user:read'])]
     private Collection $bookings;
 
     public function __construct()

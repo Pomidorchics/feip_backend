@@ -4,6 +4,14 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
+use App\Controller\HousesController;
 use App\Repository\HouseRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -11,6 +19,41 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: HouseRepository::class)]
+#[ApiResource(
+    operations: [
+        new Get(
+            name: 'get_house',
+            uriTemplate: '/api/houses/{id}',
+            controller: HousesController::class . '::getHouse'
+        ),
+        new GetCollection(
+            name: 'get_houses',
+            uriTemplate: '/api/houses',
+            controller: HousesController::class . '::getHouses'
+        ),
+        new Post(
+            name: 'create_house',
+            uriTemplate: '/api/houses',
+            controller: HousesController::class . '::createHouse'
+        ),
+        new Put(
+            name: 'update_house',
+            uriTemplate: '/api/houses/{id}',
+            controller: HousesController::class . '::updateHouse'
+        ),
+        new Patch(
+            name: 'partial_update_house',
+            uriTemplate: '/api/houses/{id}',
+            controller: HousesController::class . '::partialUpdateHouse'
+        ),
+        new Delete(
+            name: 'delete_house',
+            uriTemplate: '/api/houses/{id}',
+            controller: HousesController::class . '::deleteHouse'
+        )
+    ],
+)]
+
 class House
 {
     #[ORM\Id]
