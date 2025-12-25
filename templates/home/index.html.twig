@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Главная страница{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Добро пожаловать!</h3>
+                </div>
+                <div class="card-body">
+                    {% if app.user %}
+                        <div class="alert alert-success">
+                            <h4>Вы успешно авторизованы!</h4>
+                            <p>Пользователь: {{ app.user.email }}</p>
+                            <p>Имя: {{ app.user.name }}</p>
+                            <p>Телефон: {{ app.user.phone }}</p>
+                            
+                            {% if app.user.googleId %}
+                                <div class="mt-3">
+                                    <span class="badge bg-info">
+                                        <i class="bi bi-google"></i> Google OAuth
+                                    </span>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <a href="{{ path('app_logout') }}" class="btn btn-warning">Выйти</a>
+                    {% else %}
+                        <p>Пожалуйста, <a href="{{ path('app_login') }}">войдите</a></p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
