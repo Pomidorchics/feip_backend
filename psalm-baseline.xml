@@ -11,19 +11,29 @@
     </UnusedClass>
   </file>
   <file src="src/Controller/BookingController.php">
-    <UnusedClass>
-      <code><![CDATA[BookingController]]></code>
-    </UnusedClass>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[__construct]]></code>
+      <code><![CDATA[create]]></code>
+    </PossiblyUnusedMethod>
+    <UnusedProperty>
+      <code><![CDATA[$entityManager]]></code>
+    </UnusedProperty>
   </file>
   <file src="src/Controller/HousesController.php">
-    <UnusedClass>
-      <code><![CDATA[HousesController]]></code>
-    </UnusedClass>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[__construct]]></code>
+      <code><![CDATA[createBooking]]></code>
+      <code><![CDATA[getAvailableHouses]]></code>
+      <code><![CDATA[getBookings]]></code>
+      <code><![CDATA[getHouse]]></code>
+      <code><![CDATA[updateBooking]]></code>
+    </PossiblyUnusedMethod>
   </file>
   <file src="src/Controller/UserController.php">
-    <UnusedClass>
-      <code><![CDATA[UserController]]></code>
-    </UnusedClass>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[__construct]]></code>
+      <code><![CDATA[create]]></code>
+    </PossiblyUnusedMethod>
   </file>
   <file src="src/Entity/Booking.php">
     <PossiblyUnusedMethod>
